@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: UI_text Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: UI_text
+  m_TableCollectionNameGuidString: 7a46063926d02468ba5ea2baeeedc29c
+  m_Entries:
+  - m_Id: 244111630336
+    m_Key: Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2725889695744
+    m_Key: Home
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2736421593088
+    m_Key: Map
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658709742084096
+    m_Key: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658725168734208
+    m_Key: Music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658738661810176
+    m_Key: Vibration
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658765157228544
+    m_Key: Notifications
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658899869884416
+    m_Key: Language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658808077541376
+    m_Key: T&C
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658849957666816
+    m_Key: Privacy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 658872535605248
+    m_Key: Support
+    m_Metadata:
+      m_Items: []
+  - m_Id: 661333581225984
+    m_Key: Sound
+    m_Metadata:
+      m_Items: []
+  - m_Id: 668687727058944
+    m_Key: Full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 740155894784000
+    m_Key: Win Screen
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 3254222672046850412
+  references:
+    version: 2
+    RefIds:
+    - rid: 3254222672046850412
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1771021471891

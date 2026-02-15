@@ -1,0 +1,115 @@
+# ===========================
+# Unity .gitattributes
+# ===========================
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# ===========================
+# Unity YAML (force text merge)
+# ===========================
+*.meta            text eol=lf
+*.unity           text eol=lf merge=unityyamlmerge
+*.prefab          text eol=lf merge=unityyamlmerge
+*.asset           text eol=lf merge=unityyamlmerge
+*.mat             text eol=lf merge=unityyamlmerge
+*.anim            text eol=lf merge=unityyamlmerge
+*.controller      text eol=lf merge=unityyamlmerge
+*.overrideController text eol=lf merge=unityyamlmerge
+*.physicMaterial  text eol=lf merge=unityyamlmerge
+*.physicsMaterial2D text eol=lf merge=unityyamlmerge
+*.playable        text eol=lf merge=unityyamlmerge
+*.mask            text eol=lf merge=unityyamlmerge
+*.brush           text eol=lf merge=unityyamlmerge
+*.flare           text eol=lf merge=unityyamlmerge
+*.fontsettings    text eol=lf merge=unityyamlmerge
+*.giparams        text eol=lf merge=unityyamlmerge
+*.guiskin         text eol=lf merge=unityyamlmerge
+*.lighting        text eol=lf merge=unityyamlmerge
+*.mixer           text eol=lf merge=unityyamlmerge
+*.preset          text eol=lf merge=unityyamlmerge
+*.renderTexture   text eol=lf merge=unityyamlmerge
+*.shadervariants  text eol=lf merge=unityyamlmerge
+*.signal          text eol=lf merge=unityyamlmerge
+*.spriteatlas     text eol=lf merge=unityyamlmerge
+*.terrainlayer    text eol=lf merge=unityyamlmerge
+
+# ===========================
+# Scripts (text)
+# ===========================
+*.cs              text diff=csharp
+*.shader          text
+*.cginc           text
+*.hlsl            text
+*.compute         text
+*.json            text
+*.xml             text
+*.yml             text
+*.yaml            text
+*.txt             text
+*.md              text
+
+# ===========================
+# Binary assets (no diff/merge)
+# ===========================
+
+# Images
+*.png             binary
+*.jpg             binary
+*.jpeg            binary
+*.gif             binary
+*.bmp             binary
+*.tga             binary
+*.tiff            binary
+*.tif             binary
+*.psd             binary
+*.hdr             binary
+*.exr             binary
+*.svg             binary
+*.ico             binary
+
+# Audio
+*.mp3             binary
+*.ogg             binary
+*.wav             binary
+*.aiff            binary
+*.aif             binary
+*.mod             binary
+*.it              binary
+*.s3m             binary
+*.xm              binary
+
+# Video
+*.mp4             binary
+*.mov             binary
+*.avi             binary
+*.webm            binary
+
+# 3D Models
+*.fbx             binary
+*.obj             binary
+*.blend           binary
+*.dae             binary
+*.3ds             binary
+*.max             binary
+*.ma              binary
+*.mb              binary
+
+# Fonts
+*.ttf             binary
+*.otf             binary
+
+# Compressed / Packages
+*.zip             binary
+*.gz              binary
+*.7z              binary
+*.tar             binary
+*.unitypackage    binary
+
+# Unity-specific binary
+*.cubemap         binary
+*.dll             binary
+*.so              binary
+*.dylib           binary
+*.a               binary
+*.reason          binary
