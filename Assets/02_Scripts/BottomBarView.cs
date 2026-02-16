@@ -1,14 +1,13 @@
 using System;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 using DG.Tweening;
 
 /// <summary>
 /// Adds toggle behaviour and appear/disappear animations to the bottom bar.
 ///   - Tapping an OFF button  → selects it, plays toggle-on anim, fires <see cref="ContentActivated"/>.
 ///   - Tapping the ON  button → deselects it, plays toggle-off anim, fires <see cref="Closed"/>.
-///   - Tapping a LOCKED button → plays a shake, no state change.
+///   - Locked buttons are non-interactable (handled by <see cref="BottomHudItem"/>).
 ///   - <see cref="Appear"/> / <see cref="Disappear"/> slide + fade the entire bar.
 /// Attach to the same GameObject as <see cref="BottomHudController"/>
 /// (or assign it manually in the Inspector).
@@ -61,12 +60,9 @@ public class BottomBarView : MonoBehaviour
             return;
         }
 
-        // Tell the controller we handle click registration and initialisation.
-        // Remove any listeners it may have already registered (execution order).
         controller.externalClickHandling = true;
         controller.RemoveClickListeners();
 
-        // Bar animation refs.
         if (barRoot == null)
             barRoot = transform as RectTransform;
 
@@ -74,7 +70,6 @@ public class BottomBarView : MonoBehaviour
         if (_barCanvasGroup == null)
             _barCanvasGroup = barRoot.gameObject.AddComponent<CanvasGroup>();
 
-        // Build per-button click delegates.
         _clickActions = new UnityAction[controller.items.Count];
         for (int i = 0; i < controller.items.Count; i++)
         {
@@ -167,22 +162,16 @@ public class BottomBarView : MonoBehaviour
     {
         if (index < 0 || index >= controller.items.Count) return;
         var item = controller.items[index];
-        if (item == null) return;
-
-        // Locked buttons have interactable=false so onClick won't fire,
-        // but guard here just in case.
-        if (item.isLocked) return;
+        if (item == null || item.isLocked) return;
 
         if (controller.CurrentIndex == index)
         {
-            // Already active → toggle OFF.
             item.PlayToggleOff();
             controller.DeselectCurrent(false);
             Closed?.Invoke();
         }
         else
         {
-            // Inactive → toggle ON.
             controller.Select(index, false);
             item.PlayToggleOn();
             ContentActivated?.Invoke(index);

@@ -36,18 +36,18 @@ public class BottomHudItem : MonoBehaviour
     public float toggleOffSquash = 0.94f;
     public float toggleOffDuration = 0.15f;
 
-    [Header("Icon Activation  (rotation wobble — never conflicts with controller scale/pos)")]
+    [Header("Icon Activation  (rotation wobble)")]
     public float iconSpinAngle = 12f;
     public float iconSpinDuration = 0.35f;
-
-    [Header("Locked Shake  (horizontal shake on icon)")]
-    public float shakeStrength = 8f;
-    public float shakeDuration = 0.4f;
-    public int shakeVibrato = 10;
 
     private Image _iconImage;
     private ParticleSystem _particleSystem;
     private bool _lastLockedState;
+
+    // Cached tween IDs (avoids per-call string allocation).
+    private string _toggleTweenId;
+    private string _iconActivationId;
+    private string _unlockJumpId;
 
     void Awake()
     {
@@ -59,15 +59,20 @@ public class BottomHudItem : MonoBehaviour
             _particleSystem = icon.GetComponentInChildren<ParticleSystem>(true);
         }
 
+        int id = GetInstanceID();
+        _toggleTweenId    = $"BHI_Toggle_{id}";
+        _iconActivationId = $"BHI_IconAct_{id}";
+        _unlockJumpId     = $"BHI_Unlock_{id}";
+
         _lastLockedState = isLocked;
-        ApplyLockedState(true);
+        ApplyLockedState();
     }
 
     void Start()
     {
         // Re-apply after all Awakes and the initial canvas layout pass,
         // which can override sizes set during Awake on nested prefabs.
-        ApplyLockedState(true);
+        ApplyLockedState();
     }
 
     void Update()
@@ -76,9 +81,8 @@ public class BottomHudItem : MonoBehaviour
         {
             bool wasLocked = _lastLockedState;
             _lastLockedState = isLocked;
-            ApplyLockedState(false);
+            ApplyLockedState();
 
-            // Was locked, now unlocked → celebrate with a jump.
             if (wasLocked && !isLocked)
                 PlayUnlockJump();
         }
@@ -93,15 +97,14 @@ public class BottomHudItem : MonoBehaviour
         bool wasLocked = isLocked;
         isLocked = locked;
         _lastLockedState = locked;
-        ApplyLockedState(false);
+        ApplyLockedState();
 
         if (wasLocked && !locked)
             PlayUnlockJump();
     }
 
-    /// Enables or disables the button, swaps the icon sprite, resizes it,
-    /// and toggles the child particle system.
-    private void ApplyLockedState(bool instant)
+    /// Enables or disables the button, swaps the icon sprite and resizes it.
+    private void ApplyLockedState()
     {
         if (button != null)
             button.interactable = !isLocked;
@@ -119,27 +122,26 @@ public class BottomHudItem : MonoBehaviour
             icon.sizeDelta = new Vector2(size, size);
             icon.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, size);
             icon.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, size);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(icon);
         }
     }
+
+    // ─── Unlock Celebration ───────────────────────────
 
     /// Juicy unlock celebration: flip, hop, overshoot scale, straighten, and particle burst.
     public void PlayUnlockJump()
     {
         if (icon == null) return;
-        DOTween.Kill(UnlockJumpId);
+        DOTween.Kill(_unlockJumpId);
 
         if (_particleSystem != null)
             _particleSystem.Emit(20);
 
-        var seq = DOTween.Sequence().SetId(UnlockJumpId);
+        var seq = DOTween.Sequence().SetId(_unlockJumpId);
 
-        // 1) Quick tilt to one side (the "flip wind-up").
         seq.Append(
             icon.DOLocalRotate(new Vector3(0, 0, unlockFlipAngle), unlockFlipDuration * 0.3f)
                 .SetEase(Ease.OutQuad));
 
-        // 2) Big hop upward + overshoot flip to the other side.
         seq.Append(
             icon.DOPunchAnchorPos(Vector2.up * unlockJumpHeight, unlockJumpDuration, 1, 0.2f)
                 .SetEase(Ease.OutQuad));
@@ -147,28 +149,26 @@ public class BottomHudItem : MonoBehaviour
             icon.DOLocalRotate(new Vector3(0, 0, -unlockFlipAngle * 0.6f), unlockFlipDuration * 0.4f)
                 .SetEase(Ease.InOutQuad));
 
-        // 3) Straighten back to zero rotation with a satisfying settle.
         seq.Append(
             icon.DOLocalRotate(Vector3.zero, unlockFlipDuration * 0.3f)
                 .SetEase(Ease.OutBack));
 
-        // 4) Punch-scale on the button rect — big and bouncy.
         if (rect != null)
             seq.Insert(unlockFlipDuration * 0.3f,
                 rect.DOPunchScale(Vector3.one * unlockPunchScale, unlockJumpDuration, 2, 0.4f));
     }
 
-    // ─── Public Animation API ─────────────────────────
+    // ─── Toggle Animations ────────────────────────────
 
     /// Punch-scale on the button rect + icon rotation wobble.
     public void PlayToggleOn()
     {
-        DOTween.Kill(ToggleTweenId);
+        DOTween.Kill(_toggleTweenId);
 
         if (rect != null)
         {
             rect.DOPunchScale(Vector3.one * toggleOnPunch, toggleOnDuration, 1, 0.4f)
-                .SetId(ToggleTweenId);
+                .SetId(_toggleTweenId);
         }
 
         PlayIconActivation();
@@ -177,39 +177,21 @@ public class BottomHudItem : MonoBehaviour
     /// Subtle squash-and-return on the button rect.
     public void PlayToggleOff()
     {
-        DOTween.Kill(ToggleTweenId);
+        DOTween.Kill(_toggleTweenId);
         if (rect == null) return;
 
-        var seq = DOTween.Sequence().SetId(ToggleTweenId);
+        var seq = DOTween.Sequence().SetId(_toggleTweenId);
         seq.Append(rect.DOScale(toggleOffSquash, toggleOffDuration * 0.4f).SetEase(Ease.InQuad));
         seq.Append(rect.DOScale(1f, toggleOffDuration * 0.6f).SetEase(Ease.OutBack));
     }
 
     /// Z-rotation wobble on the icon.
-    /// Safe to layer on top of the controller's scale / anchorPosY tweens.
-    public void PlayIconActivation()
+    private void PlayIconActivation()
     {
         if (icon == null) return;
-        DOTween.Kill(IconActivationId);
+        DOTween.Kill(_iconActivationId);
 
         icon.DOPunchRotation(new Vector3(0, 0, iconSpinAngle), iconSpinDuration, 1, 0.4f)
-            .SetId(IconActivationId);
+            .SetId(_iconActivationId);
     }
-
-    /// Horizontal shake for locked-state feedback.
-    public void PlayLockedShake()
-    {
-        if (icon == null) return;
-        DOTween.Kill(LockedShakeId);
-
-        icon.DOShakeAnchorPos(shakeDuration, new Vector2(shakeStrength, 0), shakeVibrato, 90, false, true)
-            .SetId(LockedShakeId);
-    }
-
-    // ─── Tween IDs (instance-unique) ─────────────────
-
-    private string ToggleTweenId    => $"BHI_Toggle_{GetInstanceID()}";
-    private string IconActivationId => $"BHI_IconAct_{GetInstanceID()}";
-    private string LockedShakeId    => $"BHI_Shake_{GetInstanceID()}";
-    private string UnlockJumpId     => $"BHI_Unlock_{GetInstanceID()}";
 }
