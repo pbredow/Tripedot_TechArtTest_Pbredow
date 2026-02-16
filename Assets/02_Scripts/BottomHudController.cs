@@ -114,8 +114,62 @@ public class BottomHudController : MonoBehaviour
             return;
         }
 
+        FitWidthsToContainer();
+
         if (!externalClickHandling)
             Select(0, true);
+    }
+
+    /// <summary>
+    /// Scales button and marker widths so the bar fills its container correctly
+    /// on any resolution / aspect ratio. Called once in Start().
+    /// </summary>
+    void FitWidthsToContainer()
+    {
+        Canvas.ForceUpdateCanvases();
+
+        float containerWidth = buttonsParent.rect.width;
+        if (containerWidth <= 0) return;
+
+        var lg = buttonsParent.GetComponent<HorizontalLayoutGroup>();
+        float padding = 0f;
+        float spacing = 0f;
+        if (lg != null)
+        {
+            padding = lg.padding.left + lg.padding.right;
+            spacing = lg.spacing * Mathf.Max(0, items.Count - 1);
+        }
+
+        float available = containerWidth - padding - spacing;
+        if (available <= 0) return;
+
+        float refTotal = (items.Count - 1) * unselectedWidth + selectedWidth;
+        if (refTotal <= 0) return;
+
+        float scale = available / refTotal;
+
+        unselectedWidth = Mathf.Round(unselectedWidth * scale);
+        selectedWidth   = Mathf.Round(selectedWidth * scale);
+
+        if (marker != null)
+        {
+            Vector2 ms = marker.sizeDelta;
+            marker.sizeDelta = new Vector2(Mathf.Round(ms.x * scale), ms.y);
+        }
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (items[i] == null || items[i].rect == null) continue;
+            SetWidth(items[i].rect, unselectedWidth);
+
+            // Clamp Z to 0 – stray Z offsets on ScreenSpaceCamera canvases
+            // can push elements outside the camera's clip planes.
+            Vector3 lp = items[i].rect.localPosition;
+            if (lp.z != 0f)
+                items[i].rect.localPosition = new Vector3(lp.x, lp.y, 0f);
+        }
+
+        _layoutDirty = true;
     }
 
     void LateUpdate()
