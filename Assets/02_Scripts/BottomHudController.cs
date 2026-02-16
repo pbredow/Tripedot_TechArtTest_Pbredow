@@ -39,6 +39,12 @@ public class BottomHudController : MonoBehaviour
     public float labelFadeOutTime = 0.08f;
 
     int _currentIndex = -1;
+    public int CurrentIndex => _currentIndex;
+
+    /// When true, the controller will not register its own click listeners
+    /// or auto-select on Start. An external component (e.g. BottomBarView)
+    /// is expected to drive Select / DeselectCurrent calls.
+    [HideInInspector] public bool externalClickHandling;
 
     bool _layoutDirty;
     int _activeWidthTweens;
@@ -64,7 +70,7 @@ public class BottomHudController : MonoBehaviour
 
     void OnEnable()
     {
-        if (items == null) return;
+        if (items == null || externalClickHandling) return;
 
         for (int i = 0; i < items.Count; i++)
         {
@@ -74,6 +80,14 @@ public class BottomHudController : MonoBehaviour
     }
 
     void OnDisable()
+    {
+        if (items == null || _clickActions == null || externalClickHandling) return;
+        RemoveClickListeners();
+    }
+
+    /// Removes any click listeners the controller registered on the buttons.
+    /// Called by BottomBarView when it takes over click handling.
+    public void RemoveClickListeners()
     {
         if (items == null || _clickActions == null) return;
 
@@ -100,7 +114,8 @@ public class BottomHudController : MonoBehaviour
             return;
         }
 
-        Select(0, true);
+        if (!externalClickHandling)
+            Select(0, true);
     }
 
     void LateUpdate()
@@ -136,6 +151,10 @@ public class BottomHudController : MonoBehaviour
 
         SetItemState(index, selected: true, instant: instant);
 
+        // Show marker in case it was hidden by DeselectCurrent.
+        if (marker != null)
+            marker.gameObject.SetActive(true);
+
         // Ensure geometry is correct for immediate marker placement.
         _layoutDirty = true;
         LayoutRebuilder.ForceRebuildLayoutImmediate(buttonsParent);
@@ -152,6 +171,20 @@ public class BottomHudController : MonoBehaviour
         }
 
         _currentIndex = index;
+    }
+
+    /// Deselects the current button so nothing is active.
+    public void DeselectCurrent(bool instant)
+    {
+        if (_currentIndex < 0) return;
+
+        SetItemState(_currentIndex, selected: false, instant: instant);
+        _currentIndex = -1;
+
+        _layoutDirty = true;
+
+        if (marker != null)
+            marker.gameObject.SetActive(false);
     }
 
     void SetItemState(int index, bool selected, bool instant)

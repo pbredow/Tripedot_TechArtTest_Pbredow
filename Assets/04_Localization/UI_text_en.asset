@@ -74,6 +74,14 @@ MonoBehaviour:
     m_Localized: Win Screen
     m_Metadata:
       m_Items: []
+  - m_Id: 892676869185536
+    m_Localized: Wardrobe
+    m_Metadata:
+      m_Items: []
+  - m_Id: 892679519985664
+    m_Localized: Garden
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

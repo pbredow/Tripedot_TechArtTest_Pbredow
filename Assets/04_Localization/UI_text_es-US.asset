@@ -74,6 +74,14 @@ MonoBehaviour:
     m_Localized: "Pantalla\nde \nVictoria"
     m_Metadata:
       m_Items: []
+  - m_Id: 892676869185536
+    m_Localized: Ropero
+    m_Metadata:
+      m_Items: []
+  - m_Id: 892679519985664
+    m_Localized: Jardin
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
